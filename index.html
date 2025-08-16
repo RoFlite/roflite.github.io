@@ -78,25 +78,25 @@
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4 md:p-8">
+<body class="flex items-center justify-center min-h-screen p-4 md:p-8 bg-gradient-to-br from-indigo-100 via-white to-sky-100">
 
 <!-- Custom Message Box for non-alert notifications -->
 <div id="messageBox" class="bg-blue-600 text-white shadow-lg"></div>
 
 <!-- Login/Signup Page -->
-<div id="loginPage" class="liquid-glass w-full max-w-md p-8 sm:p-12 text-center fade-in overflow-y-auto max-h-[95vh]">
-    <h1 class="text-4xl font-bold text-gray-800 mb-6">RoFlite</h1>
+<div id="loginPage" class="liquid-glass w-full max-w-md p-8 sm:p-12 text-center fade-in overflow-y-auto max-h-[95vh] border-2 border-white">
+    <h1 class="text-5xl font-extrabold text-gray-800 mb-2">RoFlite ✈️</h1>
     <p class="text-sm text-gray-600 mb-8">Log in or create an account to get started!</p>
     <div class="mb-4">
-        <input type="email" id="emailInput" placeholder="Email" class="w-full p-3 rounded-lg bg-gray-200 border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300">
+        <input type="email" id="emailInput" placeholder="Email" class="w-full p-3 rounded-xl bg-gray-200 border-2 border-transparent text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-500 transition duration-300">
     </div>
     <div class="mb-6">
-        <input type="password" id="passwordInput" placeholder="Password" class="w-full p-3 rounded-lg bg-gray-200 border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300">
+        <input type="password" id="passwordInput" placeholder="Password" class="w-full p-3 rounded-xl bg-gray-200 border-2 border-transparent text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-500 transition duration-300">
     </div>
-    <button id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition duration-300 transform hover:scale-105">
+    <button id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all duration-300 transform hover:scale-[1.02] shadow-lg">
         Login
     </button>
-    <button id="signupBtn" class="w-full mt-4 bg-gray-600 text-white font-bold py-3 rounded-xl hover:bg-gray-700 transition duration-300 transform hover:scale-105">
+    <button id="signupBtn" class="w-full mt-4 bg-gray-600 text-white font-bold py-3 rounded-xl hover:bg-gray-700 transition-all duration-300 transform hover:scale-[1.02] shadow-lg">
         Sign Up
     </button>
     
@@ -118,35 +118,40 @@
 
 <!-- Profile Setup Modal -->
 <div id="profileSetupModal" class="fixed inset-0 hidden bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-    <div class="liquid-glass w-full max-w-md p-8 relative fade-in text-center">
+    <div class="liquid-glass w-full max-w-md p-8 relative fade-in text-center border-2 border-white">
         <h3 class="text-2xl font-semibold mb-6 text-gray-800">Complete Your Profile</h3>
         <p class="text-gray-600 mb-4">You're almost there! Just a few more details to get started.</p>
         <div class="mb-4">
-            <input type="text" id="airlineName" placeholder="Airline Name (e.g., Ro-Aviation)" class="w-full p-3 rounded-lg bg-gray-200 border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300">
+            <input type="text" id="airlineName" placeholder="Airline Name (e.g., Ro-Aviation)" class="w-full p-3 rounded-xl bg-gray-200 border-2 border-transparent text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-500 transition duration-300">
         </div>
         <div class="mb-6">
-            <input type="text" id="username" placeholder="Username" class="w-full p-3 rounded-lg bg-gray-200 border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300">
+            <input type="text" id="username" placeholder="Username" class="w-full p-3 rounded-xl bg-gray-200 border-2 border-transparent text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-500 transition duration-300">
             <p id="usernameStatus" class="text-left text-xs mt-1 h-4"></p>
         </div>
-        <button id="saveProfileBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition duration-300 transform hover:scale-105">
+        <button id="saveProfileBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all duration-300 transform hover:scale-[1.02] shadow-lg">
             Save Profile
         </button>
     </div>
 </div>
 
 <!-- Main Application Page -->
-<div id="mainApp" class="hidden w-full max-w-4xl h-[90vh] md:h-[80vh] flex flex-col liquid-glass p-6 sm:p-8 fade-in">
+<div id="mainApp" class="hidden w-full max-w-4xl h-[90vh] md:h-[80vh] flex flex-col liquid-glass p-6 sm:p-8 fade-in border-2 border-white">
     <!-- Header with Search Bar and User ID -->
-    <header class="flex items-center justify-between pb-4 border-b border-gray-300 mb-4">
-        <h1 class="text-3xl font-bold text-gray-800">RoFlite</h1>
-        <div class="flex-1 max-w-xs mx-4">
+    <header class="flex flex-col sm:flex-row items-center justify-between pb-4 border-b border-gray-300 mb-4">
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-2 sm:mb-0">RoFlite ✈️</h1>
+        <div class="flex-1 max-w-xs mx-0 sm:mx-4 w-full sm:w-auto">
             <div class="relative">
-                <input type="text" id="searchBar" placeholder="Search posts..." class="w-full p-2 pl-10 rounded-lg bg-gray-200 border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">🔍</span>
+                <input type="text" id="searchBar" placeholder="Search posts..." class="w-full p-3 pl-12 rounded-xl bg-gray-200 border-2 border-transparent text-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-400 transition-all duration-300">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">🔍</span>
             </div>
         </div>
-        <div class="text-xs text-right text-gray-500 break-words max-w-[200px]">
-            Your Account ID:<br><span id="currentUserId" class="font-mono text-gray-700 text-[10px] sm:text-xs"></span>
+        <div class="flex items-center space-x-4 mt-2 sm:mt-0">
+            <div class="text-xs text-right text-gray-500 break-words max-w-[200px]">
+                Your ID:<br><span id="currentUserId" class="font-mono text-gray-700 text-[10px] sm:text-xs"></span>
+            </div>
+            <button id="logoutBtn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-full shadow-lg hover:bg-red-600 transition-all duration-300">
+                Log Out
+            </button>
         </div>
     </header>
 
@@ -154,23 +159,23 @@
     <div class="flex-1 overflow-y-auto pr-2 pb-2">
         <!-- Feed Section -->
         <div id="feedSection" class="section active">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Feed</h2>
-            <div id="postsContainer" class="space-y-4">
+            <h2 class="text-3xl font-bold mb-4 text-gray-800">Feed</h2>
+            <div id="postsContainer" class="space-y-6">
                 <!-- Posts will be dynamically inserted here -->
             </div>
         </div>
 
         <!-- Search Results Section -->
         <div id="searchResultsSection" class="section hidden">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Search Results</h2>
-            <div id="searchResultsContainer" class="space-y-4">
+            <h2 class="text-3xl font-bold mb-4 text-gray-800">Search Results</h2>
+            <div id="searchResultsContainer" class="space-y-6">
                 <!-- Search results will be dynamically inserted here -->
             </div>
         </div>
 
         <!-- Messages Section -->
         <div id="messagesSection" class="section hidden">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Messages</h2>
+            <h2 class="text-3xl font-bold mb-4 text-gray-800">Messages</h2>
             <div id="messagesList" class="space-y-4">
                 <!-- Messages will be dynamically inserted here -->
             </div>
@@ -178,31 +183,30 @@
 
         <!-- Profile Section -->
         <div id="profileSection" class="section hidden">
-            <div class="flex items-center space-x-4 mb-6">
-                <img id="profileImage" src="https://placehold.co/100x100/A0AEC0/FFFFFF?text=P" class="w-24 h-24 rounded-full border-4 border-white shadow-md">
-                <div>
-                    <h2 class="text-2xl font-semibold text-gray-800">Profile</h2>
-                    <p class="text-gray-600">@<span id="profileUsername" class="font-bold text-blue-600"></span></p>
-                    <p class="text-gray-600"><span id="profileAirline" class="font-bold text-blue-600"></span></p>
+            <div class="flex flex-col items-center sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-8 mb-8 bg-white p-6 rounded-3xl shadow-lg">
+                <img id="profileImage" src="https://placehold.co/120x120/A0AEC0/FFFFFF?text=P" class="w-32 h-32 rounded-full border-4 border-white shadow-lg">
+                <div class="text-center sm:text-left">
+                    <h2 class="text-3xl font-bold text-gray-800">@<span id="profileUsername" class="font-extrabold text-blue-600"></span></h2>
+                    <p class="text-lg text-gray-600 mt-1">Airline: <span id="profileAirline" class="font-semibold text-gray-700"></span></p>
                 </div>
             </div>
         </div>
 
         <!-- Settings Section -->
         <div id="settingsSection" class="section hidden">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Settings</h2>
-            <div class="space-y-6">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Settings</h2>
+            <div class="bg-white p-8 rounded-3xl shadow-lg space-y-6">
                 <div>
                     <label for="settingsUsernameInput" class="block text-sm font-medium text-gray-700">Change Username</label>
-                    <input type="text" id="settingsUsernameInput" placeholder="New Username" class="mt-1 w-full p-3 rounded-lg bg-gray-200 border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300">
+                    <input type="text" id="settingsUsernameInput" placeholder="New Username" class="mt-1 w-full p-3 rounded-xl bg-gray-200 border-2 border-transparent text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-500 transition duration-300">
                     <p id="settingsUsernameStatus" class="text-xs mt-1 h-4"></p>
                 </div>
                 <div>
                     <label for="settingsAirlineInput" class="block text-sm font-medium text-gray-700">Change Airline</label>
-                    <input type="text" id="settingsAirlineInput" placeholder="New Airline" class="mt-1 w-full p-3 rounded-lg bg-gray-200 border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300">
+                    <input type="text" id="settingsAirlineInput" placeholder="New Airline" class="mt-1 w-full p-3 rounded-xl bg-gray-200 border-2 border-transparent text-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-500 transition duration-300">
                 </div>
-                <div class="flex items-center space-x-4">
-                    <img id="currentProfilePic" src="https://placehold.co/100x100/A0AEC0/FFFFFF?text=P" class="w-20 h-20 rounded-full border-2 border-gray-300">
+                <div class="flex items-center space-x-6">
+                    <img id="currentProfilePic" src="https://placehold.co/100x100/A0AEC0/FFFFFF?text=P" class="w-24 h-24 rounded-full border-4 border-gray-300 shadow-md">
                     <label class="block">
                         <span class="sr-only">Choose profile photo</span>
                         <input type="file" id="profilePictureInput" accept="image/*" class="block w-full text-sm text-gray-500
@@ -214,7 +218,7 @@
                         "/>
                     </label>
                 </div>
-                <button id="saveSettingsBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition duration-300 transform hover:scale-105">
+                <button id="saveSettingsBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all duration-300 transform hover:scale-[1.02] shadow-lg">
                     Save Changes
                 </button>
             </div>
@@ -222,7 +226,7 @@
         
         <!-- Admin Panel Section (Hidden by default) -->
         <div id="adminPanelSection" class="section hidden">
-            <h2 class="text-2xl font-semibold mb-4 text-red-600">Admin Panel 🚨</h2>
+            <h2 class="text-3xl font-bold mb-4 text-red-600">Admin Panel 🚨</h2>
             <p class="text-gray-600 mb-6">Manage users and content with caution. This panel is visible only to `adminaccount`.</p>
 
             <!-- User Management -->
@@ -230,20 +234,20 @@
                 <h3 class="text-xl font-semibold mb-4 text-gray-800">User Management</h3>
                 <div class="mb-4">
                     <label for="adminUsernameSearchInput" class="block text-sm font-medium text-gray-700">Find User by Username</label>
-                    <input type="text" id="adminUsernameSearchInput" placeholder="Enter username to find ID" class="w-full p-3 rounded-lg bg-gray-200 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="adminUsernameSearchInput" placeholder="Enter username to find ID" class="w-full p-3 rounded-xl bg-gray-200 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <div id="foundUserIdDisplay" class="mt-2 text-sm text-gray-600"></div>
                 </div>
                 <div class="mb-4">
                     <label for="adminUserIdInput" class="block text-sm font-medium text-gray-700">User ID</label>
-                    <input type="text" id="adminUserIdInput" placeholder="Enter User ID to manage" class="w-full p-3 rounded-lg bg-gray-200 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <input type="text" id="adminUserIdInput" placeholder="Enter User ID to manage" class="w-full p-3 rounded-xl bg-gray-200 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                 </div>
                 <div class="mb-4">
                     <label for="adminBanNoteInput" class="block text-sm font-medium text-gray-700">Ban/Suspension Note</label>
-                    <textarea id="adminBanNoteInput" placeholder="Reason for action (required for Ban/Suspend)" class="w-full p-3 rounded-lg bg-gray-200 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"></textarea>
+                    <textarea id="adminBanNoteInput" placeholder="Reason for action (required for Ban/Suspend)" class="w-full p-3 rounded-xl bg-gray-200 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"></textarea>
                 </div>
                 <div class="mb-4">
                     <label for="suspendDurationInput" class="block text-sm font-medium text-gray-700">Suspension Duration (in days)</label>
-                    <input type="number" id="suspendDurationInput" value="7" min="1" class="w-full p-3 rounded-lg bg-gray-200 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                    <input type="number" id="suspendDurationInput" value="7" min="1" class="w-full p-3 rounded-xl bg-gray-200 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-500">
                 </div>
                 <div class="flex space-x-4">
                     <button id="banUserBtn" class="flex-1 bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition duration-300">
@@ -260,7 +264,7 @@
                 <h3 class="text-xl font-semibold mb-4 text-gray-800">Post Moderation</h3>
                 <div class="mb-4">
                     <label for="adminPostIdInput" class="block text-sm font-medium text-gray-700">Post ID</label>
-                    <input type="text" id="adminPostIdInput" placeholder="Enter Post ID to take down" class="w-full p-3 rounded-lg bg-gray-200 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <input type="text" id="adminPostIdInput" placeholder="Enter Post ID to take down" class="w-full p-3 rounded-xl bg-gray-200 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                 </div>
                 <button id="takeDownPostBtn" class="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition duration-300">
                     Take Down Post
@@ -281,10 +285,10 @@
 
     <!-- Floating Action Buttons -->
     <div class="flex justify-center space-x-4 mt-6">
-        <button id="newPostBtn" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-blue-700 transition duration-300 transform hover:scale-110">
+        <button id="newPostBtn" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 transform hover:scale-110">
             ➕ Post
         </button>
-        <button id="newMessageBtn" class="bg-emerald-600 text-white font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-emerald-700 transition duration-300 transform hover:scale-110">
+        <button id="newMessageBtn" class="bg-emerald-600 text-white font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-emerald-700 transition-all duration-300 transform hover:scale-110">
             💬 Message
         </button>
     </div>
@@ -303,9 +307,9 @@
 
 <!-- New Post Modal -->
 <div id="newPostModal" class="fixed inset-0 hidden bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-    <div class="liquid-glass w-full max-w-md p-8 relative fade-in">
+    <div class="liquid-glass w-full max-w-md p-8 relative fade-in border-2 border-white">
         <h3 class="text-2xl font-semibold mb-6 text-gray-800">Create New Post</h3>
-        <textarea id="postText" class="w-full h-32 p-3 rounded-lg bg-gray-200 border border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 resize-none mb-4" placeholder="What's on your mind?"></textarea>
+        <textarea id="postText" class="w-full h-32 p-3 rounded-xl bg-gray-200 border-2 border-transparent text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-500 transition duration-300 resize-none mb-4" placeholder="What's on your mind?"></textarea>
         <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700">Add an image</label>
             <input type="file" id="postImageInput" accept="image/*" class="block w-full text-sm text-gray-500
@@ -316,7 +320,7 @@
                 hover:file:bg-blue-100
             "/>
             <div id="postImagePreviewContainer" class="mt-4 hidden">
-                <img id="postImagePreview" class="w-full h-auto rounded-lg border-2 border-gray-300 shadow-sm">
+                <img id="postImagePreview" class="w-full h-auto rounded-xl border-2 border-gray-300 shadow-sm">
             </div>
         </div>
         <div class="flex justify-between items-center mb-4">
@@ -330,28 +334,28 @@
             </div>
         </div>
         <div class="flex justify-end space-x-4">
-            <button id="cancelPostBtn" class="bg-gray-400 text-gray-800 py-2 px-6 rounded-xl hover:bg-gray-500 transition duration-300">Cancel</button>
-            <button id="submitPostBtn" class="bg-blue-600 text-white py-2 px-6 rounded-xl hover:bg-blue-700 transition duration-300">Post</button>
+            <button id="cancelPostBtn" class="bg-gray-400 text-gray-800 py-2 px-6 rounded-xl hover:bg-gray-500 transition-all duration-300">Cancel</button>
+            <button id="submitPostBtn" class="bg-blue-600 text-white py-2 px-6 rounded-xl hover:bg-blue-700 transition-all duration-300">Post</button>
         </div>
     </div>
 </div>
 
 <!-- New Message Modal -->
 <div id="newMessageModal" class="fixed inset-0 hidden bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-    <div class="liquid-glass w-full max-w-md p-8 relative fade-in">
+    <div class="liquid-glass w-full max-w-md p-8 relative fade-in border-2 border-white">
         <h3 class="text-2xl font-semibold mb-6 text-gray-800">Send Private Message</h3>
-        <input type="text" id="messageRecipient" placeholder="Recipient's User ID (e.g., a8c-123-abc)" class="w-full p-3 rounded-lg bg-gray-200 border border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition duration-300 mb-4">
-        <textarea id="messageText" class="w-full h-32 p-3 rounded-lg bg-gray-200 border border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition duration-300 resize-none mb-4" placeholder="Your message..."></textarea>
+        <input type="text" id="messageRecipient" placeholder="Recipient's User ID (e.g., a8c-123-abc)" class="w-full p-3 rounded-xl bg-gray-200 border-2 border-transparent text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-emerald-500 transition duration-300 mb-4">
+        <textarea id="messageText" class="w-full h-32 p-3 rounded-xl bg-gray-200 border-2 border-transparent text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-emerald-500 transition duration-300 resize-none mb-4" placeholder="Your message..."></textarea>
         <div class="flex justify-end space-x-4">
-            <button id="cancelMessageBtn" class="bg-gray-400 text-gray-800 py-2 px-6 rounded-xl hover:bg-gray-500 transition duration-300">Cancel</button>
-            <button id="sendMessageBtn" class="bg-emerald-600 text-white py-2 px-6 rounded-xl hover:bg-emerald-700 transition duration-300">Send</button>
+            <button id="cancelMessageBtn" class="bg-gray-400 text-gray-800 py-2 px-6 rounded-xl hover:bg-gray-500 transition-all duration-300">Cancel</button>
+            <button id="sendMessageBtn" class="bg-emerald-600 text-white py-2 px-6 rounded-xl hover:bg-emerald-700 transition-all duration-300">Send</button>
         </div>
     </div>
 </div>
 
 <!-- Post Detail Modal -->
 <div id="postDetailModal" class="fixed inset-0 hidden bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-    <div class="liquid-glass w-full max-w-2xl h-[90vh] flex flex-col p-8 relative fade-in">
+    <div class="liquid-glass w-full max-w-2xl h-[90vh] flex flex-col p-8 relative fade-in border-2 border-white">
         <button id="closePostDetailBtn" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition-colors duration-200">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-circle"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
         </button>
@@ -360,8 +364,8 @@
         <!-- Reply form -->
         <div class="mt-auto pt-4 border-t border-gray-300">
             <h4 class="text-xl font-semibold mb-4 text-gray-800">Leave a Reply</h4>
-            <textarea id="replyText" class="w-full h-24 p-3 rounded-lg bg-gray-200 border border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 resize-none mb-4" placeholder="Your reply..."></textarea>
-            <button id="submitReplyBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition duration-300 transform hover:scale-105">
+            <textarea id="replyText" class="w-full h-24 p-3 rounded-xl bg-gray-200 border-2 border-transparent text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-500 transition duration-300 resize-none mb-4" placeholder="Your reply..."></textarea>
+            <button id="submitReplyBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all duration-300 transform hover:scale-[1.02] shadow-lg">
                 Reply
             </button>
         </div>
@@ -381,7 +385,7 @@
         signInWithPopup,
         signOut
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, collection, query, where, getDocs, onSnapshot, arrayUnion, arrayRemove, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, collection, query, where, getDocs, onSnapshot, arrayUnion, arrayRemove, runTransaction, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // Your web app's Firebase configuration, as provided by you.
     const firebaseConfig = {
@@ -409,6 +413,7 @@
     const messageBox = document.getElementById('messageBox');
     const currentUserIdSpan = document.getElementById('currentUserId');
     const searchBar = document.getElementById('searchBar');
+    const logoutBtn = document.getElementById('logoutBtn');
 
     const googleBtn = document.getElementById('googleBtn');
 
@@ -633,6 +638,19 @@
             showMessage("Google sign-in failed: " + error.message, true);
         }
     });
+    
+    // Log Out button listener
+    logoutBtn.addEventListener('click', async () => {
+        try {
+            await signOut(auth);
+            showMessage("Logged out successfully!");
+            // onAuthStateChanged listener will handle UI changes
+        } catch (error) {
+            console.error("Error logging out:", error);
+            showMessage("Failed to log out.", true);
+        }
+    });
+
 
     // --- Profile Setup Modal Logic ---
     saveProfileBtn.addEventListener('click', async () => {
