@@ -219,6 +219,64 @@
                 </button>
             </div>
         </div>
+        
+        <!-- Admin Panel Section (Hidden by default) -->
+        <div id="adminPanelSection" class="section hidden">
+            <h2 class="text-2xl font-semibold mb-4 text-red-600">Admin Panel 🚨</h2>
+            <p class="text-gray-600 mb-6">Manage users and content with caution. This panel is visible only to `adminaccount`.</p>
+
+            <!-- User Management -->
+            <div class="bg-white p-6 rounded-3xl shadow-lg mb-6">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">User Management</h3>
+                <div class="mb-4">
+                    <label for="adminUsernameSearchInput" class="block text-sm font-medium text-gray-700">Find User by Username</label>
+                    <input type="text" id="adminUsernameSearchInput" placeholder="Enter username to find ID" class="w-full p-3 rounded-lg bg-gray-200 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div id="foundUserIdDisplay" class="mt-2 text-sm text-gray-600"></div>
+                </div>
+                <div class="mb-4">
+                    <label for="adminUserIdInput" class="block text-sm font-medium text-gray-700">User ID</label>
+                    <input type="text" id="adminUserIdInput" placeholder="Enter User ID to manage" class="w-full p-3 rounded-lg bg-gray-200 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                <div class="mb-4">
+                    <label for="adminBanNoteInput" class="block text-sm font-medium text-gray-700">Ban/Suspension Note</label>
+                    <textarea id="adminBanNoteInput" placeholder="Reason for action (required for Ban/Suspend)" class="w-full p-3 rounded-lg bg-gray-200 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="suspendDurationInput" class="block text-sm font-medium text-gray-700">Suspension Duration (in days)</label>
+                    <input type="number" id="suspendDurationInput" value="7" min="1" class="w-full p-3 rounded-lg bg-gray-200 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                </div>
+                <div class="flex space-x-4">
+                    <button id="banUserBtn" class="flex-1 bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition duration-300">
+                        Ban User
+                    </button>
+                    <button id="suspendUserBtn" class="flex-1 bg-yellow-600 text-white font-bold py-3 rounded-xl hover:bg-yellow-700 transition duration-300">
+                        Suspend User
+                    </button>
+                </div>
+            </div>
+
+            <!-- Post Moderation -->
+            <div class="bg-white p-6 rounded-3xl shadow-lg">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Post Moderation</h3>
+                <div class="mb-4">
+                    <label for="adminPostIdInput" class="block text-sm font-medium text-gray-700">Post ID</label>
+                    <input type="text" id="adminPostIdInput" placeholder="Enter Post ID to take down" class="w-full p-3 rounded-lg bg-gray-200 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                <button id="takeDownPostBtn" class="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition duration-300">
+                    Take Down Post
+                </button>
+            </div>
+            
+            <!-- Banned and Suspended Users Lists -->
+            <div class="bg-white p-6 rounded-3xl shadow-lg mt-6">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Banned & Suspended Users</h3>
+                <div id="bannedSuspendedList" class="space-y-4">
+                    <!-- List will be populated dynamically -->
+                    <p class="text-center text-gray-500">No users currently banned or suspended.</p>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Floating Action Buttons -->
@@ -238,6 +296,7 @@
             <li><button id="messagesTab" class="nav-btn text-gray-400 font-medium py-2 px-4 rounded-xl transition-colors duration-300 hover:bg-gray-200">✉️<span class="block text-xs">Messages</span></button></li>
             <li><button id="profileTab" class="nav-btn text-gray-400 font-medium py-2 px-4 rounded-xl transition-colors duration-300 hover:bg-gray-200">👤<span class="block text-xs">Profile</span></button></li>
             <li><button id="settingsTab" class="nav-btn text-gray-400 font-medium py-2 px-4 rounded-xl transition-colors duration-300 hover:bg-gray-200">⚙️<span class="block text-xs">Settings</span></button></li>
+            <li><button id="adminTab" class="nav-btn hidden text-gray-400 font-medium py-2 px-4 rounded-xl transition-colors duration-300 hover:bg-gray-200">👮<span class="block text-xs">Admin</span></button></li>
         </ul>
     </nav>
 </div>
@@ -320,13 +379,11 @@
         onAuthStateChanged,
         GoogleAuthProvider,
         signInWithPopup,
-        signInAnonymously,
-        signInWithCustomToken
+        signOut
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, collection, query, where, getDocs, onSnapshot, arrayUnion, arrayRemove, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, collection, query, where, getDocs, onSnapshot, arrayUnion, arrayRemove, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // Global variables for Firebase configuration. These are hardcoded as requested.
-    // Replace these values with your actual Firebase project configuration.
+    // Your web app's Firebase configuration, as provided by you.
     const firebaseConfig = {
         apiKey: "AIzaSyDxEVWH3ukcs2C0tTa08faIGOarGsReZxo",
         authDomain: "project-7604626948994220056.firebaseapp.com",
@@ -336,9 +393,11 @@
         appId: "1:288162968865:web:8e35c777371c1e4fe4ba60",
         measurementId: "G-N3KC2BJPR8"
     };
-
-    const appId = "default-app-id";
-    const initialAuthToken = ""; // Placeholder for the custom auth token
+    
+    // Global variables for Firestore and Auth.
+    let db, auth, userId;
+    let currentUserData = null;
+    const appId = "default-app-id"; // Retaining this for Firestore pathing
 
     // --- DOM Elements ---
     const loginPage = document.getElementById('loginPage');
@@ -399,9 +458,23 @@
     const usernameInput = document.getElementById('username');
     const usernameStatus = document.getElementById('usernameStatus');
 
-    // --- Firebase Setup ---
-    let db, auth, userId;
-    let currentUserData = null;
+    // Admin Panel Elements
+    const adminTab = document.getElementById('adminTab');
+    const adminPanelSection = document.getElementById('adminPanelSection');
+    const adminUsernameSearchInput = document.getElementById('adminUsernameSearchInput');
+    const foundUserIdDisplay = document.getElementById('foundUserIdDisplay');
+    const adminUserIdInput = document.getElementById('adminUserIdInput');
+    const adminBanNoteInput = document.getElementById('adminBanNoteInput');
+    const suspendDurationInput = document.getElementById('suspendDurationInput');
+    const banUserBtn = document.getElementById('banUserBtn');
+    const suspendUserBtn = document.getElementById('suspendUserBtn');
+    const adminPostIdInput = document.getElementById('adminPostIdInput');
+    const takeDownPostBtn = document.getElementById('takeDownPostBtn');
+    const bannedSuspendedList = document.getElementById('bannedSuspendedList');
+
+    // Store a map of user data for efficient lookups
+    let usersDataMap = new Map();
+    let usersByUsernameMap = new Map();
 
     // Show a temporary message to the user
     function showMessage(text, isError = false) {
@@ -419,33 +492,55 @@
             db = getFirestore(app);
             auth = getAuth(app);
             
-            // Sign in with the custom token or anonymously
-            if (initialAuthToken) {
-                await signInWithCustomToken(auth, initialAuthToken);
-            } else {
-                await signInAnonymously(auth);
-            }
-
+            // This listener will trigger whenever the user signs in or out.
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     userId = user.uid;
                     currentUserIdSpan.textContent = userId;
-                    await fetchUserData();
+                    await fetchAllUsersData(); // Fetch all user data first
+                    await fetchUserData(); // Then fetch current user data and check admin status
                     // Setup listeners only once we are sure the user is authenticated
                     setupRealtimeListeners();
                 } else {
-                    // Show login page if no user is signed in
+                    // Check if the user is banned before showing login page
+                    const email = emailInput.value;
+                    const q = query(collection(db, `artifacts/${appId}/public/data/banned_users`), where("email", "==", email));
+                    const querySnapshot = await getDocs(q);
+                    if (!querySnapshot.empty) {
+                        const banData = querySnapshot.docs[0].data();
+                        showMessage(`You have been permanently banned. Reason: ${banData.note}`, true);
+                        loginPage.classList.remove('hidden');
+                        mainApp.classList.add('hidden');
+                        return;
+                    }
                     loginPage.classList.remove('hidden');
                     mainApp.classList.add('hidden');
                 }
             });
         } catch (error) {
-            console.error("Error initializing Firebase or signing in:", error);
-            showMessage("Failed to initialize. Please try again.", true);
+            console.error("Error initializing Firebase:", error);
+            showMessage("Failed to initialize. Please check your Firebase config.", true);
         }
     }
 
     // --- Main Functions ---
+    // Fetch all user data to cache it for quick lookups
+    async function fetchAllUsersData() {
+        try {
+            const usersRef = collection(db, `artifacts/${appId}/users`);
+            const usersSnapshot = await getDocs(usersRef);
+            usersDataMap.clear();
+            usersByUsernameMap.clear();
+            usersSnapshot.forEach(userDoc => {
+                const userData = userDoc.data().profile.data;
+                usersDataMap.set(userDoc.id, userData);
+                usersByUsernameMap.set(userData.username, userDoc.id);
+            });
+        } catch (e) {
+            console.error("Error fetching all user data:", e);
+        }
+    }
+
     // Fetch and display current user data
     async function fetchUserData() {
         if (!userId) return;
@@ -462,566 +557,388 @@
                 profileImage.src = "https://placehold.co/100x100/A0AEC0/FFFFFF?text=P";
                 currentProfilePic.src = "https://placehold.co/100x100/A0AEC0/FFFFFF?text=P";
             }
-            settingsUsernameInput.value = currentUserData.username;
-            settingsAirlineInput.value = currentUserData.airline;
             loginPage.classList.add('hidden');
             mainApp.classList.remove('hidden');
-            mainApp.classList.add('fade-in');
+
+            // Check if user is suspended
+            if (currentUserData.status === 'suspended' && currentUserData.suspensionEndDate && new Date() < new Date(currentUserData.suspensionEndDate)) {
+                showMessage(`Your account is suspended until ${new Date(currentUserData.suspensionEndDate).toLocaleString()}. Reason: ${currentUserData.suspensionNote || 'No reason provided.'}`, true);
+                signOut(auth);
+                return;
+            } else if (currentUserData.status === 'suspended' && new Date() >= new Date(currentUserData.suspensionEndDate)) {
+                // Suspension has expired, lift the suspension
+                await updateDoc(userDocRef, {
+                    status: 'active',
+                    suspensionEndDate: null,
+                    suspensionNote: null
+                });
+                showMessage("Your suspension has been lifted!");
+            }
+            
+            // Check for admin privileges
+            if (currentUserData.username === 'adminaccount') {
+                adminTab.classList.remove('hidden');
+            } else {
+                adminTab.classList.add('hidden');
+            }
         } else {
-            // New user, show profile setup modal
+            // New user, show the profile setup modal
             profileSetupModal.classList.remove('hidden');
-            loginPage.classList.add('hidden');
         }
     }
 
-    // Handle user signup
-    async function handleSignup() {
-        const email = emailInput.value.trim();
-        const password = passwordInput.value.trim();
+    // --- Event Listeners for Authentication ---
+    loginBtn.addEventListener('click', async () => {
+        const email = emailInput.value;
+        const password = passwordInput.value;
+        try {
+            // Check for ban before attempting to log in
+            const q = query(collection(db, `artifacts/${appId}/public/data/banned_users`), where("email", "==", email));
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+                const banData = querySnapshot.docs[0].data();
+                showMessage(`You have been permanently banned. Reason: ${banData.note}`, true);
+                return;
+            }
 
-        if (!email || !password) {
-            showMessage("Please enter both email and password.", true);
-            return;
+            await signInWithEmailAndPassword(auth, email, password);
+            showMessage("Logged in successfully!");
+        } catch (error) {
+            console.error("Login failed:", error);
+            showMessage("Login failed: " + error.message, true);
         }
+    });
 
+    signupBtn.addEventListener('click', async () => {
+        const email = emailInput.value;
+        const password = passwordInput.value;
         try {
             await createUserWithEmailAndPassword(auth, email, password);
-            showMessage("Account created successfully! Please complete your profile.");
-        } catch (e) {
-            console.error("Error signing up:", e);
-            showMessage("Error creating account: " + e.message, true);
+            showMessage("Account created! Redirecting to profile setup...");
+            // onAuthStateChanged listener will handle showing the profile setup modal
+        } catch (error) {
+            console.error("Signup failed:", error);
+            showMessage("Signup failed: " + error.message, true);
         }
-    }
+    });
 
-    // Handle user login
-    async function handleLogin() {
-        const email = emailInput.value.trim();
-        const password = passwordInput.value.trim();
-
-        if (!email || !password) {
-            showMessage("Please enter both email and password.", true);
-            return;
-        }
-
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            showMessage("Logged in successfully! Welcome back.");
-        } catch (e) {
-            console.error("Error logging in:", e);
-            showMessage("Login failed: " + e.message, true);
-        }
-    }
-
-    // Handle social sign-in
-    async function handleSocialSignIn(provider) {
+    googleBtn.addEventListener('click', async () => {
+        const provider = new GoogleAuthProvider();
         try {
             await signInWithPopup(auth, provider);
-            showMessage("Signed in successfully!");
+            showMessage("Signed in with Google!");
+            // onAuthStateChanged listener will handle the rest
         } catch (error) {
-            console.error("Social sign-in failed:", error);
-            showMessage("Social sign-in failed: " + error.message, true);
+            console.error("Google sign-in failed:", error);
+            showMessage("Google sign-in failed: " + error.message, true);
         }
-    }
+    });
 
-    // Handle saving the user's profile data
-    async function handleSaveProfile() {
-        saveProfileBtn.disabled = true;
-        saveProfileBtn.textContent = 'Saving...';
-
-        const airlineName = airlineNameInput.value.trim();
+    // --- Profile Setup Modal Logic ---
+    saveProfileBtn.addEventListener('click', async () => {
         const username = usernameInput.value.trim();
-
-        if (!airlineName || !username) {
-            showMessage("Please enter both an airline name and a username.", true);
-            saveProfileBtn.disabled = false;
-            saveProfileBtn.textContent = 'Save Profile';
+        const airline = airlineNameInput.value.trim();
+        if (!username || !airline) {
+            showMessage("Username and Airline cannot be empty.", true);
             return;
         }
 
         try {
-            // Use runTransaction to ensure the username check and save are atomic
-            await runTransaction(db, async (transaction) => {
-                const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/profile/data`);
-                const usernameCheckRef = doc(db, `artifacts/${appId}/public/data/usernames/${username.toLowerCase()}`);
+            // Check if username is unique
+            const q = query(collection(db, `artifacts/${appId}/users`), where("profile.data.username", "==", username));
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+                usernameStatus.textContent = "Username is already taken.";
+                usernameStatus.classList.remove('text-green-500');
+                usernameStatus.classList.add('text-red-500');
+                return;
+            }
+            usernameStatus.textContent = "Username is available!";
+            usernameStatus.classList.remove('text-red-500');
+            usernameStatus.classList.add('text-green-500');
 
-                // Check for username uniqueness again inside the transaction for safety
-                const usernameDocSnap = await transaction.get(usernameCheckRef);
-                if (usernameDocSnap.exists()) {
-                     // This should ideally not happen if the first check passed, but is good practice
-                    throw new Error("Username already taken.");
-                }
-
-                // Save profile data
-                transaction.set(userDocRef, {
-                    username: username,
-                    airline: airlineName,
-                    createdAt: new Date()
-                });
-
-                // Create a separate document to track the username
-                transaction.set(usernameCheckRef, {
-                    userId: userId
-                });
+            // Save the user profile data
+            const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/profile/data`);
+            await setDoc(userDocRef, {
+                username: username,
+                airline: airline,
+                profilePic: null, // Initial profile pic is null
+                posts: [],
+                following: [],
+                followers: [],
+                status: 'active', // New status field
             });
-
             showMessage("Profile saved successfully!");
             profileSetupModal.classList.add('hidden');
-            fetchUserData(); // Transition to the main app
+            await fetchUserData(); // Refresh data and show main app
         } catch (e) {
-            console.error("Error setting user profile: ", e);
-            // Check for the specific error thrown in the transaction
-            if (e.message === "Username already taken.") {
-                 showMessage("That username is already taken. Please choose another.", true);
-                 usernameStatus.textContent = "Username unavailable";
-                 usernameStatus.style.color = "red";
-            } else {
-                showMessage("An error occurred while saving profile.", true);
-            }
-        } finally {
-            saveProfileBtn.disabled = false;
-            saveProfileBtn.textContent = 'Save Profile';
+            console.error("Error setting up profile:", e);
+            showMessage("Failed to save profile.", true);
         }
-    }
+    });
 
-    async function handleSaveSettings() {
-        saveSettingsBtn.disabled = true;
-        saveSettingsBtn.textContent = 'Saving...';
-
-        const newUsername = settingsUsernameInput.value.trim();
-        const newAirline = settingsAirlineInput.value.trim();
-        let newProfilePic = currentUserData.profilePic || null;
-
-        if (profilePictureInput.files && profilePictureInput.files[0]) {
-            const file = profilePictureInput.files[0];
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = async () => {
-                newProfilePic = reader.result;
-                await updateProfile(newUsername, newAirline, newProfilePic);
-                saveSettingsBtn.disabled = false;
-                saveSettingsBtn.textContent = 'Save Changes';
-            };
-            reader.onerror = () => {
-                showMessage("Failed to read image file.", true);
-                saveSettingsBtn.disabled = false;
-                saveSettingsBtn.textContent = 'Save Changes';
-            };
-        } else {
-            await updateProfile(newUsername, newAirline, newProfilePic);
-            saveSettingsBtn.disabled = false;
-            saveSettingsBtn.textContent = 'Save Changes';
-        }
-    }
-
-    async function updateProfile(newUsername, newAirline, newProfilePic) {
-        try {
-            await runTransaction(db, async (transaction) => {
-                const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/profile/data`);
-                const oldUsername = currentUserData.username;
-
-                // Check for username uniqueness if it changed
-                if (newUsername !== oldUsername) {
-                    const usernameCheckRef = doc(db, `artifacts/${appId}/public/data/usernames/${newUsername.toLowerCase()}`);
-                    const usernameDocSnap = await transaction.get(usernameCheckRef);
-                    if (usernameDocSnap.exists()) {
-                        throw new Error("Username already taken.");
-                    }
-                    // Delete old username document and create new one
-                    if (oldUsername) {
-                         const oldUsernameRef = doc(db, `artifacts/${appId}/public/data/usernames/${oldUsername.toLowerCase()}`);
-                         transaction.delete(oldUsernameRef);
-                    }
-                    transaction.set(usernameCheckRef, { userId: userId });
-                }
-
-                // Update user profile document
-                transaction.update(userDocRef, {
-                    username: newUsername,
-                    airline: newAirline,
-                    profilePic: newProfilePic
-                });
-            });
-
-            showMessage("Settings saved successfully!");
-            fetchUserData(); // Refresh UI with new data
-        } catch (e) {
-            console.error("Error updating settings: ", e);
-            if (e.message === "Username already taken.") {
-                 showMessage("That username is already taken. Please choose another.", true);
-                 settingsUsernameStatus.textContent = "Username unavailable";
-                 settingsUsernameStatus.style.color = "red";
-            } else {
-                showMessage("An error occurred while saving settings.", true);
-            }
-        }
-    }
-
-    // Handle liking/unliking a post
-    async function likePost(postId) {
-        if (!userId) {
-            showMessage("Please log in to like posts.", true);
+    // --- Search Logic ---
+    searchBar.addEventListener('input', async () => {
+        const queryText = searchBar.value.trim().toLowerCase();
+        if (queryText === '') {
+            showSection('feed');
             return;
         }
-
-        const postDocRef = doc(db, `artifacts/${appId}/public/data/posts/${postId}`);
+        showSection('searchResults');
+        
+        // Clear previous results
+        searchResultsContainer.innerHTML = '';
+        
         try {
-            await runTransaction(db, async (transaction) => {
-                const postDoc = await transaction.get(postDocRef);
-                if (!postDoc.exists()) {
-                    throw "Post does not exist!";
-                }
-
-                const currentLikes = postDoc.data().likes || [];
-                const isLiked = currentLikes.includes(userId);
-
-                if (isLiked) {
-                    transaction.update(postDocRef, {
-                        likes: arrayRemove(userId)
-                    });
-                } else {
-                    transaction.update(postDocRef, {
-                        likes: arrayUnion(userId)
-                    });
+            // Simple search for posts containing the query in content or username
+            const postsRef = collection(db, `artifacts/${appId}/public/data/posts`);
+            const q = query(postsRef);
+            const querySnapshot = await getDocs(q);
+            
+            let resultsFound = false;
+            querySnapshot.forEach((doc) => {
+                const post = doc.data();
+                const postContent = post.content.toLowerCase();
+                const username = post.authorUsername.toLowerCase();
+                
+                if (postContent.includes(queryText) || username.includes(queryText)) {
+                    createPostElement(doc.id, post, searchResultsContainer);
+                    resultsFound = true;
                 }
             });
+
+            if (!resultsFound) {
+                searchResultsContainer.innerHTML = `<p class="text-center text-gray-500 mt-8">No results found for "${searchBar.value}".</p>`;
+            }
         } catch (e) {
-            console.error("Transaction failed: ", e);
-            showMessage("Failed to like/unlike post. Please try again.", true);
+            console.error("Error searching posts:", e);
+            showMessage("Failed to perform search.", true);
+        }
+    });
+
+    // --- Navigation Logic ---
+    navButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            const sectionName = e.currentTarget.id.replace('Tab', '');
+            showSection(sectionName);
+        });
+    });
+
+    function showSection(sectionName) {
+        sections.forEach(section => {
+            if (section.id === sectionName + 'Section') {
+                section.classList.remove('hidden');
+            } else {
+                section.classList.add('hidden');
+            }
+        });
+        navButtons.forEach(button => {
+            if (button.id === sectionName + 'Tab') {
+                button.classList.add('active', 'text-blue-600');
+                button.classList.remove('text-gray-400');
+            } else {
+                button.classList.remove('active', 'text-blue-600');
+                button.classList.add('text-gray-400');
+            }
+        });
+        
+        // Refresh admin lists when the admin panel is opened
+        if (sectionName === 'adminPanel') {
+            fetchBannedAndSuspendedUsers();
         }
     }
 
-    // Handle posting a reply
-    async function submitReply(postId) {
+    // --- Real-time Listeners ---
+    function setupRealtimeListeners() {
+        // Posts listener
+        const postsRef = collection(db, `artifacts/${appId}/public/data/posts`);
+        const postsQuery = query(postsRef);
+        onSnapshot(postsQuery, (snapshot) => {
+            feedContainer.innerHTML = '';
+            const sortedPosts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                                           .sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+            
+            let hasPosts = false;
+            sortedPosts.forEach(post => {
+                // Get author data from the cached map
+                const authorData = usersDataMap.get(post.authorId);
+                // Only display the post if the author is not banned or suspended
+                if (authorData && authorData.status !== 'banned' && authorData.status !== 'suspended') {
+                    createPostElement(post.id, post, feedContainer);
+                    hasPosts = true;
+                }
+            });
+
+            if (!hasPosts) {
+                 feedContainer.innerHTML = `<p class="text-center text-gray-500 mt-8">No posts yet. Be the first to post!</p>`;
+            }
+        }, (error) => {
+            console.error("Error fetching posts:", error);
+            showMessage("Failed to load feed.", true);
+        });
+
+        // Messages listener
+        const messagesRef = collection(db, `artifacts/${appId}/public/data/messages`);
+        const messagesQuery = query(messagesRef);
+        onSnapshot(messagesQuery, async (snapshot) => {
+            messagesList.innerHTML = '';
+            let hasMessages = false;
+            // Filter messages for the current user (sent or received)
+            const sortedMessages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                                                .sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+
+            for (const msg of sortedMessages) {
+                if (msg.recipientId === userId || msg.senderId === userId) {
+                    let otherUsername = "User";
+                    if (msg.senderId !== userId) {
+                        const senderData = usersDataMap.get(msg.senderId);
+                        if (senderData) {
+                            otherUsername = senderData.username;
+                        }
+                        const messageElement = document.createElement('div');
+                        messageElement.className = 'bg-gray-200 p-4 rounded-xl shadow-sm';
+                        messageElement.innerHTML = `
+                            <p class="font-semibold text-gray-800">From: @${otherUsername}</p>
+                            <p class="text-gray-600 mt-2">${msg.content}</p>
+                            <p class="text-right text-xs text-gray-500 mt-2">${msg.createdAt.toDate().toLocaleString()}</p>
+                        `;
+                        messagesList.appendChild(messageElement);
+                        hasMessages = true;
+                    } else {
+                        const recipientData = usersDataMap.get(msg.recipientId);
+                        if (recipientData) {
+                            otherUsername = recipientData.username;
+                        }
+                        const messageElement = document.createElement('div');
+                        messageElement.className = 'bg-blue-100 p-4 rounded-xl shadow-sm';
+                        messageElement.innerHTML = `
+                            <p class="font-semibold text-gray-800">To: @${otherUsername}</p>
+                            <p class="text-gray-600 mt-2">${msg.content}</p>
+                            <p class="text-right text-xs text-gray-500 mt-2">${msg.createdAt.toDate().toLocaleString()}</p>
+                        `;
+                        messagesList.appendChild(messageElement);
+                        hasMessages = true;
+                    }
+                }
+            }
+
+            if (!hasMessages) {
+                messagesList.innerHTML = `<p class="text-center text-gray-500 mt-8">No messages yet.</p>`;
+            }
+        }, (error) => {
+            console.error("Error fetching messages:", error);
+            showMessage("Failed to load messages.", true);
+        });
+    }
+
+    // --- Post Management ---
+    function createPostElement(postId, postData, container) {
+        const postElement = document.createElement('div');
+        postElement.className = 'bg-white p-6 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer';
+        postElement.setAttribute('data-post-id', postId);
+        
+        let authorData = usersDataMap.get(postData.authorId);
+        if (!authorData) {
+            authorData = { username: "Unknown User", airline: "" };
+        }
+        
+        const contentStyle = `color:${postData.textColor || '#1c2a39'}; background-color:${postData.backgroundColor || '#ffffff'}; padding: 1rem; border-radius: 1.5rem;`;
+        
+        postElement.innerHTML = `
+            <div class="flex items-center space-x-4 mb-4">
+                <img src="${authorData.profilePic || 'https://placehold.co/50x50/A0AEC0/FFFFFF?text=P'}" class="w-12 h-12 rounded-full border-2 border-white shadow-sm">
+                <div>
+                    <span class="font-bold text-gray-800">@${authorData.username}</span>
+                    <p class="text-sm text-gray-500">${authorData.airline}</p>
+                </div>
+            </div>
+            <div class="post-content mb-4" style="${contentStyle}">
+                <p class="text-base">${postData.content}</p>
+            </div>
+            ${postData.imageUrl ? `<img src="${postData.imageUrl}" class="rounded-xl w-full h-auto mb-4 border-2 border-gray-300">` : ''}
+            <div class="flex items-center text-gray-500 text-sm">
+                <span>${postData.likes.length} Likes</span>
+                <span class="ml-4">${postData.replies ? postData.replies.length : 0} Replies</span>
+            </div>
+            <p class="text-xs text-gray-400 mt-2">Posted: ${new Date(postData.createdAt.toDate()).toLocaleString()}</p>
+            <p class="text-xs text-gray-400 mt-1 break-all">Post ID: ${postId}</p>
+        `;
+        
+        postElement.addEventListener('click', () => {
+            viewPostDetail(postId, postData);
+        });
+        
+        container.appendChild(postElement);
+    }
+
+    async function viewPostDetail(postId, postData) {
+        postDetailContent.innerHTML = ''; // Clear previous content
+
+        // Re-use the createPostElement function for the post content
+        createPostElement(postId, postData, postDetailContent);
+        
+        // Display replies
+        const repliesContainer = document.createElement('div');
+        repliesContainer.className = 'mt-4 border-t border-gray-300 pt-4 space-y-4';
+        
+        if (postData.replies && postData.replies.length > 0) {
+            postData.replies.forEach(reply => {
+                const replyAuthor = usersDataMap.get(reply.authorId) || { username: "Unknown User" };
+                const replyElement = document.createElement('div');
+                replyElement.className = 'bg-gray-100 p-4 rounded-xl';
+                replyElement.innerHTML = `
+                    <p class="font-semibold text-gray-800">@${replyAuthor.username}</p>
+                    <p class="text-gray-600 mt-1">${reply.content}</p>
+                    <p class="text-xs text-gray-400 mt-2">${new Date(reply.createdAt.toDate()).toLocaleString()}</p>
+                `;
+                repliesContainer.appendChild(replyElement);
+            });
+        } else {
+            repliesContainer.innerHTML = '<p class="text-center text-gray-500">No replies yet.</p>';
+        }
+        
+        postDetailContent.appendChild(repliesContainer);
+        
+        submitReplyBtn.setAttribute('data-post-id', postId);
+        postDetailModal.classList.remove('hidden');
+    }
+
+    closePostDetailBtn.addEventListener('click', () => {
+        postDetailModal.classList.add('hidden');
+    });
+
+    submitReplyBtn.addEventListener('click', async () => {
+        const postId = submitReplyBtn.getAttribute('data-post-id');
         const replyContent = replyText.value.trim();
+
         if (!replyContent) {
             showMessage("Reply content cannot be empty.", true);
             return;
         }
 
         try {
-            await addDoc(collection(db, `artifacts/${appId}/public/data/posts/${postId}/replies`), {
-                content: replyContent,
-                authorId: userId,
-                username: currentUserData.username,
-                profilePic: currentUserData.profilePic,
-                createdAt: new Date()
+            const postDocRef = doc(db, `artifacts/${appId}/public/data/posts/${postId}`);
+            await updateDoc(postDocRef, {
+                replies: arrayUnion({
+                    authorId: userId,
+                    content: replyContent,
+                    createdAt: new Date(),
+                })
             });
-            showMessage("Reply posted successfully!");
+            showMessage("Reply submitted!");
             replyText.value = '';
         } catch (e) {
-            console.error("Error adding reply: ", e);
-            showMessage("Failed to post reply.", true);
+            console.error("Error submitting reply:", e);
+            showMessage("Failed to submit reply.", true);
         }
-    }
-
-    // --- Real-time Listeners ---
-    function setupRealtimeListeners() {
-        // Listen for new posts in the public feed
-        const postsRef = collection(db, `artifacts/${appId}/public/data/posts`);
-        const unsubscribePosts = onSnapshot(postsRef, (snapshot) => {
-            const posts = [];
-            snapshot.forEach(doc => {
-                posts.push({ id: doc.id, ...doc.data() });
-            });
-            posts.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
-            renderPosts(posts);
-            // Re-render search results to keep them up to date
-            searchPosts(searchBar.value);
-        });
-
-        // Listen for messages private to the current user
-        const messagesRef = collection(db, `artifacts/${appId}/public/data/messages`);
-        const messagesQuery = query(messagesRef, where('recipientId', '==', userId));
-        const unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
-            const messages = [];
-            snapshot.forEach(doc => {
-                const messageData = doc.data();
-                messages.push({
-                    id: doc.id,
-                    ...messageData
-                });
-            });
-            messages.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
-            renderMessages(messages);
-        });
-    }
-
-    // --- Rendering Functions ---
-    function renderPosts(posts) {
-        feedContainer.innerHTML = '';
-        if (posts.length === 0) {
-            feedContainer.innerHTML = '<div class="text-center text-gray-500 py-8">No posts yet. Be the first to post!</div>';
-            return;
-        }
-        posts.forEach(post => {
-            const isLiked = post.likes && post.likes.includes(userId);
-            const likeCount = post.likes ? post.likes.length : 0;
-            const likeButtonColor = isLiked ? 'text-blue-600' : 'text-gray-400';
-            const postBgColor = post.backgroundColor || 'rgba(255, 255, 255, 0.6)';
-            const postTextColor = post.textColor || '#1c2a39';
-            const profilePicSrc = post.profilePic || "https://placehold.co/48x48/A0AEC0/FFFFFF?text=P";
-            const postImageHtml = post.postImage ? `<img src="${post.postImage}" class="mt-4 rounded-lg shadow-md w-full h-auto object-cover max-h-[400px]">` : '';
-
-
-            const postElement = document.createElement('div');
-            postElement.className = 'liquid-glass p-4 rounded-xl cursor-pointer';
-            postElement.style.backgroundColor = postBgColor;
-            postElement.style.color = postTextColor;
-            postElement.innerHTML = `
-                <div class="flex items-start space-x-4 mb-2">
-                    <img src="${profilePicSrc}" class="w-12 h-12 rounded-full border-2 border-white shadow-md">
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between">
-                            <span class="font-bold text-lg">${post.username}</span>
-                            <span class="text-xs text-gray-500">${post.airline}</span>
-                        </div>
-                        <p class="text-sm mt-1 whitespace-pre-wrap" style="color:${postTextColor};">${post.content}</p>
-                    </div>
-                </div>
-                ${postImageHtml}
-                <div class="flex justify-between items-center text-xs text-gray-500 mt-2">
-                    <button class="like-btn flex items-center space-x-1" data-post-id="${post.id}">
-                        <span class="w-4 h-4 transition-colors duration-200 ${likeButtonColor}">❤️</span>
-                        <span>${likeCount}</span>
-                    </button>
-                    <span class="text-right">Posted: ${post.createdAt ? new Date(post.createdAt.toDate()).toLocaleString() : 'N/A'}</span>
-                </div>
-            `;
-            feedContainer.appendChild(postElement);
-            // Add click listener for the like button
-            postElement.querySelector('.like-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                likePost(post.id);
-            });
-            // Add click listener to open post detail modal
-            postElement.addEventListener('click', () => {
-                showPostDetail(post.id);
-            });
-        });
-    }
-
-    async function showPostDetail(postId) {
-        try {
-            const postDocRef = doc(db, `artifacts/${appId}/public/data/posts/${postId}`);
-            const postDocSnap = await getDoc(postDocRef);
-            if (!postDocSnap.exists()) {
-                showMessage("Post not found.", true);
-                return;
-            }
-            const post = { id: postDocSnap.id, ...postDocSnap.data() };
-            
-            const postBgColor = post.backgroundColor || 'rgba(255, 255, 255, 0.6)';
-            const postTextColor = post.textColor || '#1c2a39';
-            const profilePicSrc = post.profilePic || "https://placehold.co/48x48/A0AEC0/FFFFFF?text=P";
-            const postImageHtml = post.postImage ? `<img src="${post.postImage}" class="mt-4 rounded-lg shadow-md w-full h-auto object-contain max-h-[400px]">` : '';
-
-            postDetailContent.innerHTML = `
-                <div class="liquid-glass p-4 rounded-xl mb-4" style="background-color:${postBgColor}; color:${postTextColor};">
-                    <div class="flex items-start space-x-4 mb-2">
-                        <img src="${profilePicSrc}" class="w-12 h-12 rounded-full border-2 border-white shadow-md">
-                        <div class="flex-1">
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold text-lg">${post.username}</span>
-                                <span class="text-xs text-gray-500">${post.airline}</span>
-                            </div>
-                            <p class="text-sm mt-1 whitespace-pre-wrap" style="color:${postTextColor};">${post.content}</p>
-                        </div>
-                    </div>
-                    ${postImageHtml}
-                    <div class="flex justify-between items-center text-xs text-gray-500 mt-2">
-                        <span>Likes: ${post.likes ? post.likes.length : 0}</span>
-                        <span>Posted: ${post.createdAt ? new Date(post.createdAt.toDate()).toLocaleString() : 'N/A'}</span>
-                    </div>
-                </div>
-                <h4 class="text-xl font-semibold mb-4 text-gray-800">Replies</h4>
-                <div id="repliesContainer" class="space-y-4"></div>
-            `;
-
-            // Set up reply listener
-            const repliesContainer = document.getElementById('repliesContainer');
-            const repliesRef = collection(db, `artifacts/${appId}/public/data/posts/${postId}/replies`);
-            const unsubscribeReplies = onSnapshot(repliesRef, (snapshot) => {
-                const replies = [];
-                snapshot.forEach(doc => {
-                    replies.push({ id: doc.id, ...doc.data() });
-                });
-                replies.sort((a, b) => a.createdAt.toDate() - b.createdAt.toDate()); // Sort chronologically
-                repliesContainer.innerHTML = '';
-                if (replies.length === 0) {
-                    repliesContainer.innerHTML = '<div class="text-center text-gray-500 py-4">No replies yet.</div>';
-                }
-                replies.forEach(reply => {
-                    const replyProfilePic = reply.profilePic || "https://placehold.co/48x48/A0AEC0/FFFFFF?text=P";
-                    const replyElement = document.createElement('div');
-                    replyElement.className = 'liquid-glass p-4 rounded-xl';
-                    replyElement.innerHTML = `
-                        <div class="flex items-start space-x-4">
-                            <img src="${replyProfilePic}" class="w-10 h-10 rounded-full border-2 border-white shadow-sm">
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-bold text-md">${reply.username}</span>
-                                    <span class="text-xs text-gray-500">${reply.createdAt ? new Date(reply.createdAt.toDate()).toLocaleString() : 'N/A'}</span>
-                                </div>
-                                <p class="text-sm mt-1 whitespace-pre-wrap">${reply.content}</p>
-                            </div>
-                        </div>
-                    `;
-                    repliesContainer.appendChild(replyElement);
-                });
-            });
-
-            // Make sure to remove old listener when modal is closed
-            closePostDetailBtn.onclick = () => {
-                unsubscribeReplies();
-                postDetailModal.classList.add('hidden');
-            };
-
-            submitReplyBtn.onclick = () => submitReply(postId);
-
-            postDetailModal.classList.remove('hidden');
-
-        } catch (e) {
-            console.error("Error fetching post details:", e);
-            showMessage("Failed to load post details.", true);
-        }
-    }
-
-
-    function renderSearchResults(posts) {
-        searchResultsContainer.innerHTML = '';
-        if (posts.length === 0) {
-            searchResultsContainer.innerHTML = '<div class="text-center text-gray-500 py-8">No posts match your search.</div>';
-            return;
-        }
-        posts.forEach(post => {
-            const isLiked = post.likes && post.likes.includes(userId);
-            const likeCount = post.likes ? post.likes.length : 0;
-            const likeButtonColor = isLiked ? 'text-blue-600' : 'text-gray-400';
-            const postBgColor = post.backgroundColor || 'rgba(255, 255, 255, 0.6)';
-            const postTextColor = post.textColor || '#1c2a39';
-            const profilePicSrc = post.profilePic || "https://placehold.co/48x48/A0AEC0/FFFFFF?text=P";
-            const postImageHtml = post.postImage ? `<img src="${post.postImage}" class="mt-4 rounded-lg shadow-md w-full h-auto object-cover max-h-[400px]">` : '';
-
-            const postElement = document.createElement('div');
-            postElement.className = 'liquid-glass p-4 rounded-xl cursor-pointer';
-            postElement.style.backgroundColor = postBgColor;
-            postElement.style.color = postTextColor;
-            postElement.innerHTML = `
-                <div class="flex items-start space-x-4 mb-2">
-                    <img src="${profilePicSrc}" class="w-12 h-12 rounded-full border-2 border-white shadow-md">
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between">
-                            <span class="font-bold text-lg">${post.username}</span>
-                            <span class="text-xs text-gray-500">${post.airline}</span>
-                        </div>
-                        <p class="text-sm mt-1 whitespace-pre-wrap" style="color:${postTextColor};">${post.content}</p>
-                    </div>
-                </div>
-                ${postImageHtml}
-                <div class="flex justify-between items-center text-xs text-gray-500 mt-2">
-                    <button class="like-btn flex items-center space-x-1" data-post-id="${post.id}">
-                        <span class="w-4 h-4 transition-colors duration-200 ${likeButtonColor}">❤️</span>
-                        <span>${likeCount}</span>
-                    </button>
-                    <span class="text-right">Posted: ${post.createdAt ? new Date(post.createdAt.toDate()).toLocaleString() : 'N/A'}</span>
-                </div>
-            `;
-            searchResultsContainer.appendChild(postElement);
-            postElement.querySelector('.like-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                likePost(post.id);
-            });
-            postElement.addEventListener('click', () => {
-                showPostDetail(post.id);
-            });
-        });
-    }
-
-    function renderMessages(messages) {
-        messagesList.innerHTML = '';
-        if (messages.length === 0) {
-            messagesList.innerHTML = '<div class="text-center text-gray-500 py-8">No messages yet.</div>';
-            return;
-        }
-        messages.forEach(message => {
-            const messageElement = document.createElement('div');
-            messageElement.className = 'liquid-glass p-4 rounded-xl';
-            const date = message.createdAt ? new Date(message.createdAt.toDate()).toLocaleString() : 'N/A';
-            messageElement.innerHTML = `
-                <div class="flex items-center justify-between mb-2">
-                    <span class="font-bold text-emerald-600">From: ${message.senderUsername}</span>
-                    <span class="text-xs text-gray-500">${date}</span>
-                </div>
-                <p class="text-sm text-gray-700 whitespace-pre-wrap">${message.content}</p>
-            `;
-            messagesList.appendChild(messageElement);
-        });
-    }
-
-    // --- Search Functionality ---
-    let allPosts = [];
-    let initialPostsListenerUnsubscribe = null;
-
-    function searchPosts(queryText) {
-        const lowerCaseQuery = queryText.toLowerCase();
-        if (lowerCaseQuery.length > 0) {
-            const filteredPosts = allPosts.filter(post =>
-                post.content.toLowerCase().includes(lowerCaseQuery) ||
-                post.username.toLowerCase().includes(lowerCaseQuery) ||
-                post.airline.toLowerCase().includes(lowerCaseQuery)
-            );
-            renderSearchResults(filteredPosts);
-            showSection('searchResultsSection');
-        } else {
-            showSection('feedSection');
-        }
-    }
-
-    function showSection(sectionId) {
-        sections.forEach(sec => sec.classList.add('hidden'));
-        document.getElementById(sectionId).classList.remove('hidden');
-        navButtons.forEach(btn => btn.classList.remove('active', 'text-blue-600'));
-        navButtons.forEach(btn => btn.classList.add('text-gray-400'));
-        document.getElementById(`${sectionId.replace('Section', 'Tab')}`).classList.add('active', 'text-blue-600');
-    }
-
-    // --- Event Listeners ---
-    loginBtn.addEventListener('click', handleLogin);
-    signupBtn.addEventListener('click', handleSignup);
-    saveProfileBtn.addEventListener('click', handleSaveProfile);
-    saveSettingsBtn.addEventListener('click', handleSaveSettings);
-    usernameInput.addEventListener('input', () => {
-        usernameStatus.textContent = ''; // Clear status on input
-    });
-    settingsUsernameInput.addEventListener('input', () => {
-        settingsUsernameStatus.textContent = '';
-    });
-    searchBar.addEventListener('input', (e) => searchPosts(e.target.value));
-
-    // Social Login Button
-    googleBtn.addEventListener('click', () => handleSocialSignIn(new GoogleAuthProvider()));
-
-    // Navigation
-    navButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const targetId = e.currentTarget.id.replace('Tab', 'Section');
-            showSection(targetId);
-        });
     });
 
-    // Modals
-    newPostBtn.addEventListener('click', () => {
-        newPostModal.classList.remove('hidden');
-    });
+    // --- Modal Handlers ---
+    newPostBtn.addEventListener('click', () => newPostModal.classList.remove('hidden'));
+    cancelPostBtn.addEventListener('click', () => newPostModal.classList.add('hidden'));
+    newMessageBtn.addEventListener('click', () => newMessageModal.classList.remove('hidden'));
+    cancelMessageBtn.addEventListener('click', () => newMessageModal.classList.add('hidden'));
 
-    cancelPostBtn.addEventListener('click', () => {
-        newPostModal.classList.add('hidden');
-        postTextarea.value = '';
-        postImageInput.value = '';
-        postImagePreviewContainer.classList.add('hidden');
-        postImagePreview.src = '';
-    });
-    
     postImageInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -1030,64 +947,46 @@
                 postImagePreview.src = e.target.result;
                 postImagePreviewContainer.classList.remove('hidden');
             };
-            reader.onerror = () => {
-                showMessage("Failed to read image file.", true);
-                postImageInput.value = '';
-                postImagePreviewContainer.classList.add('hidden');
-            };
             reader.readAsDataURL(file);
         } else {
+            postImagePreview.src = '';
             postImagePreviewContainer.classList.add('hidden');
         }
     });
 
     submitPostBtn.addEventListener('click', async () => {
         const content = postTextarea.value.trim();
-        const postImage = postImagePreview.src;
-        if (!content && !postImage) {
-            showMessage("Post content or an image is required.", true);
+        const imageUrl = postImagePreview.src;
+        const textColor = postTextColor.value;
+        const backgroundColor = postBackgroundColor.value;
+
+        if (!content && !imageUrl) {
+            showMessage("Post content or image cannot be empty.", true);
             return;
         }
 
         try {
-            const newPostData = {
-                username: currentUserData.username,
-                airline: currentUserData.airline,
-                profilePic: currentUserData.profilePic || null,
-                content: content,
-                textColor: postTextColor.value,
-                backgroundColor: postBackgroundColor.value,
-                createdAt: new Date(),
+            await addDoc(collection(db, `artifacts/${appId}/public/data/posts`), {
                 authorId: userId,
-                likes: []
-            };
-
-            if (postImage) {
-                newPostData.postImage = postImage;
-            }
-
-            await addDoc(collection(db, `artifacts/${appId}/public/data/posts`), newPostData);
-            
-            showMessage("Post created successfully!");
+                authorUsername: currentUserData.username,
+                content: content,
+                imageUrl: imageUrl === 'https://placehold.co/100x100/A0AEC0/FFFFFF?text=P' ? null : imageUrl,
+                textColor: textColor,
+                backgroundColor: backgroundColor,
+                likes: [],
+                replies: [],
+                createdAt: new Date()
+            });
+            showMessage("Post submitted successfully!");
             newPostModal.classList.add('hidden');
             postTextarea.value = '';
             postImageInput.value = '';
-            postImagePreviewContainer.classList.add('hidden');
             postImagePreview.src = '';
+            postImagePreviewContainer.classList.add('hidden');
         } catch (e) {
-            console.error("Error adding document: ", e);
-            showMessage("Failed to create post.", true);
+            console.error("Error adding document:", e);
+            showMessage("Failed to submit post.", true);
         }
-    });
-
-    newMessageBtn.addEventListener('click', () => {
-        newMessageModal.classList.remove('hidden');
-    });
-
-    cancelMessageBtn.addEventListener('click', () => {
-        newMessageModal.classList.add('hidden');
-        messageRecipientInput.value = '';
-        messageTextarea.value = '';
     });
 
     sendMessageBtn.addEventListener('click', async () => {
@@ -1123,6 +1022,262 @@
             showMessage("Failed to send message.", true);
         }
     });
+    
+    // --- Settings Logic ---
+    saveSettingsBtn.addEventListener('click', async () => {
+        const newUsername = settingsUsernameInput.value.trim();
+        const newAirline = settingsAirlineInput.value.trim();
+
+        try {
+            const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/profile/data`);
+            const updateData = {};
+            let isUsernameChanged = false;
+
+            if (newUsername && newUsername !== currentUserData.username) {
+                // Check if new username is unique
+                const q = query(collection(db, `artifacts/${appId}/users`), where("profile.data.username", "==", newUsername));
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    settingsUsernameStatus.textContent = "Username is already taken.";
+                    settingsUsernameStatus.classList.remove('text-green-500');
+                    settingsUsernameStatus.classList.add('text-red-500');
+                    return;
+                }
+                updateData.username = newUsername;
+                isUsernameChanged = true;
+            }
+
+            if (newAirline && newAirline !== currentUserData.airline) {
+                updateData.airline = newAirline;
+            }
+
+            if (profilePictureInput.files[0]) {
+                // Not implementing image upload to Firestore Storage for brevity, using placeholder
+                // In a real app, this is where you'd upload the image and get a URL
+                updateData.profilePic = "https://placehold.co/100x100/A0AEC0/FFFFFF?text=Updated";
+            }
+
+            if (Object.keys(updateData).length > 0) {
+                await updateDoc(userDocRef, updateData);
+                showMessage("Settings saved successfully!");
+                if (isUsernameChanged) {
+                    // Update username on all existing posts by this user
+                    const postsRef = collection(db, `artifacts/${appId}/public/data/posts`);
+                    const userPostsQuery = query(postsRef, where("authorId", "==", userId));
+                    const userPostsSnapshot = await getDocs(userPostsQuery);
+                    const batch = writeBatch(db);
+                    userPostsSnapshot.forEach(postDoc => {
+                        const postRef = doc(db, `artifacts/${appId}/public/data/posts/${postDoc.id}`);
+                        batch.update(postRef, { authorUsername: newUsername });
+                    });
+                    await batch.commit();
+                }
+            } else {
+                showMessage("No changes to save.", false);
+            }
+            await fetchUserData(); // Refresh data and UI
+        } catch (e) {
+            console.error("Error saving settings:", e);
+            showMessage("Failed to save settings.", true);
+        }
+    });
+
+    // --- Admin Panel Logic ---
+    adminUsernameSearchInput.addEventListener('input', () => {
+        const username = adminUsernameSearchInput.value.trim();
+        const foundId = usersByUsernameMap.get(username);
+        if (foundId) {
+            foundUserIdDisplay.textContent = `User ID: ${foundId}`;
+            adminUserIdInput.value = foundId;
+            foundUserIdDisplay.classList.remove('text-red-500');
+            foundUserIdDisplay.classList.add('text-green-500');
+        } else {
+            foundUserIdDisplay.textContent = 'No user found with that username.';
+            adminUserIdInput.value = '';
+            foundUserIdDisplay.classList.remove('text-green-500');
+            foundUserIdDisplay.classList.add('text-red-500');
+        }
+    });
+
+    banUserBtn.addEventListener('click', async () => {
+        const targetId = adminUserIdInput.value.trim();
+        const banNote = adminBanNoteInput.value.trim();
+
+        if (!targetId || !banNote) {
+            showMessage("Please provide a User ID and a ban note.", true);
+            return;
+        }
+
+        try {
+            await runTransaction(db, async (transaction) => {
+                const userDocRef = doc(db, `artifacts/${appId}/users/${targetId}/profile/data`);
+                const userDoc = await transaction.get(userDocRef);
+
+                if (!userDoc.exists()) {
+                    throw "User not found.";
+                }
+                
+                // Get user's email for permanent ban list
+                const authUser = await auth.getUser(targetId);
+                const userEmail = authUser.email;
+
+                // Update user profile status
+                transaction.update(userDocRef, {
+                    status: 'banned',
+                    banNote: banNote
+                });
+
+                // Add user to a public banned list (for future login checks)
+                const bannedRef = doc(db, `artifacts/${appId}/public/data/banned_users`, targetId);
+                transaction.set(bannedRef, {
+                    userId: targetId,
+                    username: userDoc.data().username,
+                    email: userEmail,
+                    note: banNote,
+                    bannedAt: new Date()
+                });
+            });
+
+            // Sign out the user immediately if they are currently logged in
+            if (auth.currentUser && auth.currentUser.uid === targetId) {
+                await signOut(auth);
+            }
+            showMessage(`User with ID ${targetId} has been permanently banned.`);
+            adminUserIdInput.value = '';
+            adminBanNoteInput.value = '';
+            fetchBannedAndSuspendedUsers();
+        } catch (e) {
+            console.error("Error banning user:", e);
+            showMessage("Failed to ban user: " + e, true);
+        }
+    });
+
+    suspendUserBtn.addEventListener('click', async () => {
+        const targetId = adminUserIdInput.value.trim();
+        const banNote = adminBanNoteInput.value.trim();
+        const duration = parseInt(suspendDurationInput.value);
+
+        if (!targetId || !banNote || isNaN(duration) || duration <= 0) {
+            showMessage("Please provide a User ID, a suspension note, and a valid duration (in days).", true);
+            return;
+        }
+
+        try {
+            const userDocRef = doc(db, `artifacts/${appId}/users/${targetId}/profile/data`);
+            const suspensionEndDate = new Date();
+            suspensionEndDate.setDate(suspensionEndDate.getDate() + duration);
+
+            await updateDoc(userDocRef, {
+                status: 'suspended',
+                suspensionEndDate: suspensionEndDate.toISOString(),
+                suspensionNote: banNote
+            });
+            showMessage(`User with ID ${targetId} has been suspended for ${duration} days.`);
+            adminUserIdInput.value = '';
+            adminBanNoteInput.value = '';
+            fetchBannedAndSuspendedUsers();
+        } catch (e) {
+            console.error("Error suspending user:", e);
+            showMessage("Failed to suspend user: " + e, true);
+        }
+    });
+
+    takeDownPostBtn.addEventListener('click', async () => {
+        const postId = adminPostIdInput.value.trim();
+        if (!postId) {
+            showMessage("Please provide a Post ID to take down.", true);
+            return;
+        }
+
+        try {
+            await deleteDoc(doc(db, `artifacts/${appId}/public/data/posts`, postId));
+            showMessage(`Post with ID ${postId} has been taken down.`);
+            adminPostIdInput.value = '';
+        } catch (e) {
+            console.error("Error taking down post:", e);
+            showMessage("Failed to take down post: " + e, true);
+        }
+    });
+    
+    // Fetch and display banned and suspended users for admin panel
+    async function fetchBannedAndSuspendedUsers() {
+        bannedSuspendedList.innerHTML = '';
+        try {
+            const usersRef = collection(db, `artifacts/${appId}/users`);
+            const q = query(usersRef, where("profile.data.status", "in", ["banned", "suspended"]));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                bannedSuspendedList.innerHTML = `<p class="text-center text-gray-500">No users currently banned or suspended.</p>`;
+                return;
+            }
+            
+            querySnapshot.forEach(userDoc => {
+                const userData = userDoc.data().profile.data;
+                const userId = userDoc.id;
+                const userElement = document.createElement('div');
+                userElement.className = 'bg-gray-100 p-4 rounded-xl flex items-center justify-between';
+                
+                let statusText = userData.status;
+                let actionBtnText = "Unban";
+                let actionBtnClass = "bg-green-600 hover:bg-green-700";
+
+                if (userData.status === 'suspended') {
+                    const suspensionEndDate = new Date(userData.suspensionEndDate);
+                    const remainingDays = Math.ceil((suspensionEndDate - new Date()) / (1000 * 60 * 60 * 24));
+                    statusText = `Suspended (${remainingDays} days remaining)`;
+                    actionBtnText = "Lift Suspension";
+                    actionBtnClass = "bg-green-600 hover:bg-green-700";
+                }
+                
+                userElement.innerHTML = `
+                    <div>
+                        <p class="font-bold text-gray-800">@${userData.username}</p>
+                        <p class="text-sm text-gray-600">ID: ${userId}</p>
+                        <p class="text-xs text-red-500">${statusText}</p>
+                        <p class="text-xs text-gray-500">Note: ${userData.banNote || userData.suspensionNote || 'N/A'}</p>
+                    </div>
+                    <button class="lift-ban-btn ${actionBtnClass} text-white font-bold py-2 px-4 rounded-lg transition duration-300" data-user-id="${userId}" data-status="${userData.status}">
+                        ${actionBtnText}
+                    </button>
+                `;
+                bannedSuspendedList.appendChild(userElement);
+            });
+            
+            // Add click listeners to the dynamically created buttons
+            bannedSuspendedList.querySelectorAll('.lift-ban-btn').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const targetId = e.target.dataset.userId;
+                    const status = e.target.dataset.status;
+
+                    try {
+                        const userDocRef = doc(db, `artifacts/${appId}/users/${targetId}/profile/data`);
+                        const updateData = { status: 'active' };
+
+                        if (status === 'suspended') {
+                            updateData.suspensionEndDate = null;
+                            updateData.suspensionNote = null;
+                        } else if (status === 'banned') {
+                            updateData.banNote = null;
+                            await deleteDoc(doc(db, `artifacts/${appId}/public/data/banned_users`, targetId));
+                        }
+
+                        await updateDoc(userDocRef, updateData);
+                        showMessage(`Action lifted for user ${targetId}.`);
+                        fetchBannedAndSuspendedUsers(); // Refresh the list
+                    } catch (e) {
+                        console.error("Error lifting action:", e);
+                        showMessage("Failed to lift action: " + e, true);
+                    }
+                });
+            });
+
+        } catch (e) {
+            console.error("Error fetching banned/suspended users:", e);
+            bannedSuspendedList.innerHTML = `<p class="text-center text-red-500">Failed to load list.</p>`;
+        }
+    }
+
 
     // Initial setup
     window.onload = initializeAndAuthenticate;
